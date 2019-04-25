@@ -12,12 +12,12 @@ MyAge=MyAge(good)';
 MyID=MyID(good)';
 SameHH=SameHH(good);
 Ext_Contact=1-SameHH;
-D_Ext_Unscaled=zeros(length(ModelBds)-1,length(ModelBds)-1); % WAIFW matrix with only external contacts
-D_Int_Unscaled=D_Ext_Unscaled; % Only internal contacts (needed for d_int)
-D_All_Unscaled=D_Ext_Unscaled; % This includes all interactions
-Contact_No_Ext=D_Ext_Unscaled;
-Contact_No_Int=D_Int_Unscaled;
-Contact_No_All=D_Ext_Unscaled;
+D_Ext=zeros(length(ModelBds)-1,length(ModelBds)-1); % WAIFW matrix with only external contacts
+D_Int=D_Ext; % Only internal contacts (needed for d_int)
+D_All=D_Ext; % This includes all interactions
+Contact_No_Ext=D_Ext;
+Contact_No_Int=D_Int;
+Contact_No_All=D_Ext;
 
 Contact_Duration=[];
 Contact_Duration(Ext_Contact==0)=0.1018;
@@ -34,15 +34,15 @@ for Class1=1:length(ModelBds)-1
     Participant_in_C1=MyAge==Class1; % Find contact events where participant is in class
     for Class2=1:length(ModelBds)-1
         Contact_in_C2=ContactAge==Class2; % Find contact events where contact is in class
-        D_Ext_Unscaled(Class1,Class2)=(Participant_in_C1.*Contact_in_C2.*Ext_Contact)*Contact_Duration';
-        D_Int_Unscaled(Class1,Class2)=(Participant_in_C1.*Contact_in_C2.*(1-Ext_Contact))*Contact_Duration';
-        D_All_Unscaled(Class1,Class2)=(Participant_in_C1.*Contact_in_C2)*Contact_Duration';
+        D_Ext(Class1,Class2)=(Participant_in_C1.*Contact_in_C2.*Ext_Contact)*Contact_Duration';
+        D_Int(Class1,Class2)=(Participant_in_C1.*Contact_in_C2.*(1-Ext_Contact))*Contact_Duration';
+        D_All(Class1,Class2)=(Participant_in_C1.*Contact_in_C2)*Contact_Duration';
         
     end
     Total_in_C1=length(unique(MyID(Participant_in_C1))); % This is total number of participants in class
-    D_Ext_Unscaled(Class1,:)=D_Ext_Unscaled(Class1,:)/Total_in_C1; % Scale by number of contacts recorded for this age class
-    D_Int_Unscaled(Class1,:)=D_Int_Unscaled(Class1,:)/Total_in_C1;
-    D_All_Unscaled(Class1,:)=D_All_Unscaled(Class1,:)/Total_in_C1;
+    D_Ext(Class1,:)=D_Ext(Class1,:)/Total_in_C1; % Scale by number of contacts recorded for this age class
+    D_Int(Class1,:)=D_Int(Class1,:)/Total_in_C1;
+    D_All(Class1,:)=D_All(Class1,:)/Total_in_C1;
 end
 
 disp('int strength matrix calculated')
@@ -86,8 +86,8 @@ ClassProb(end-1)=ClassProb(end-1)+(365*ModelBds(end-1)-TL)/TD;
 ClassProb(end)= 1-sum(ClassProb);
 disp('Age class proportions calculated')
 
-filename=['Kenya_MixingData_' datestr(now,'ddmmyy_HHMMSS')];
-save(filename, 'D_Ext_Unscaled', 'D_All_Unscaled', 'd_ext',...
+filename=['Parameters/Kenya_MixingData_' datestr(now,'ddmmyy_HHMMSS')];
+save(filename, 'D_Ext', 'D_All', 'd_ext',...
     'd_int', 'd_all', 'ClassProb', 'E', 'NGrid', 'tickGrid', 'DemGrid');
 
 function [P_Age] = LeaveAgeProb(A,kB,kL,TB,TL,Cond_DC)

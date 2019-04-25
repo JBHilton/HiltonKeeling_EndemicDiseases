@@ -17,12 +17,12 @@ Contact_Freq=Contact_Freq(good);
 My_Age=My_Age(good);
 Contact_Loc_Main=Contact_Loc_Main(good);
 Ext_Contact=(Contact_Loc_Main~=1); % Finds all the contacts which are not home contacts
-D_Ext_Unscaled=zeros(length(ModelBds)-1,length(ModelBds)-1); % WAIFW matrix with only external contacts
-D_Int_Unscaled=D_Ext_Unscaled; % Only internal contacts (needed to get duration for internal mixing)
-D_All_Unscaled=D_Ext_Unscaled; % This includes all interactions
-Contact_No_Ext=D_Ext_Unscaled;
-Contact_No_Int=D_Int_Unscaled;
-Contact_No_All=D_Ext_Unscaled;
+D_Ext=zeros(length(ModelBds)-1,length(ModelBds)-1); % WAIFW matrix with only external contacts
+D_Int=D_Ext; % Only internal contacts (needed to get duration for internal mixing)
+D_All=D_Ext; % This includes all interactions
+Contact_No_Ext=D_Ext;
+Contact_No_Int=D_Int;
+Contact_No_All=D_Ext;
 
 Contact_Duration=TRANSLATE_CONTACT(Contact_Duration)/(24*60); % Rescale to units of days
 
@@ -43,15 +43,15 @@ for Class1=1:length(ModelBds)-1 % Indexed by age class
     Participant_in_C1=My_Age>=ModelBds(Class1)&My_Age<ModelBds(Class1+1); % Find contact events where participant is in class
     for Class2=1:length(ModelBds)-1
         Contact_in_C2=Contact_Age>=ModelBds(Class2)&Contact_Age<ModelBds(Class2+1); % Find contact events where contact is in class
-        D_Ext_Unscaled(Class1,Class2)=(Participant_in_C1.*Contact_in_C2.*Ext_Contact)*Contact_Duration';
-        D_Int_Unscaled(Class1,Class2)=(Participant_in_C1.*Contact_in_C2.*(1-Ext_Contact))*Contact_Duration';
-        D_All_Unscaled(Class1,Class2)=(Participant_in_C1.*Contact_in_C2)*Contact_Duration';
+        D_Ext(Class1,Class2)=(Participant_in_C1.*Contact_in_C2.*Ext_Contact)*Contact_Duration';
+        D_Int(Class1,Class2)=(Participant_in_C1.*Contact_in_C2.*(1-Ext_Contact))*Contact_Duration';
+        D_All(Class1,Class2)=(Participant_in_C1.*Contact_in_C2)*Contact_Duration';
         
     end
     Total_in_C1=length(unique(Global_ID(Participant_in_C1))); % This is total number of participants in class
-    D_Ext_Unscaled(Class1,:)=D_Ext_Unscaled(Class1,:)/Total_in_C1; % Scale by number of contacts recorded for this age class
-    D_Int_Unscaled(Class1,:)=D_Int_Unscaled(Class1,:)/Total_in_C1;
-    D_All_Unscaled(Class1,:)=D_All_Unscaled(Class1,:)/Total_in_C1;
+    D_Ext(Class1,:)=D_Ext(Class1,:)/Total_in_C1; % Scale by number of contacts recorded for this age class
+    D_Int(Class1,:)=D_Int(Class1,:)/Total_in_C1;
+    D_All(Class1,:)=D_All(Class1,:)/Total_in_C1;
 end
 
 disp('Duration matrix calculated')
@@ -92,8 +92,8 @@ ClassProb=ClassProb*TL/TD; % Scale by proportion of lifetime spent as child
 ClassProb(end)=ClassProb(end)+(TD-TL)/TD;
 disp('Age class proportions calculated')
 
-filename=['UK_MixingData_' datestr(now,'ddmmyy_HHMMSS')];
-save(filename, 'D_Ext_Unscaled', 'D_All_Unscaled', 'd_ext',...
+filename=['Parameters/UK_MixingData_' datestr(now,'ddmmyy_HHMMSS')];
+save(filename, 'D_Ext', 'D_All', 'd_ext',...
     'd_int', 'd_int_kids', 'd_all', 'ClassProb', 'E',...
     'NGrid', 'tickGrid', 'DemGrid');
 

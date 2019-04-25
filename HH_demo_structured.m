@@ -243,4 +243,4 @@ n=find(nTicker==(kB+kL) | nTicker==(kB+kL+kB)); % States at leaving stage
 nER_Start=2*P_R;
 nER_Leave = nVectR; % Total exposure level at leaving
 
-P_R = sum((nER_Leave(n) - nER_Start(n)).*H_Eq(n)')/sum((nVectN(n)-nER_Start(n)).*H_Eq(n)');
+P_R = sum((nER_Leave(n) - nER_Start).*H_Eq(n)')/sum((nVectN(n)-nER_Start).*H_Eq(n)');
