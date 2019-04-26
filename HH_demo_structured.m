@@ -24,17 +24,17 @@ end
 [S,I,R]=meshgrid([0:maxN],[0:maxN],[0:maxN]); m=find(S+I+R<=maxN & S+I+R>=2)'; % Impose household size constraint
 VectN=S(m)+I(m)+R(m); VectS=S(m); VectI=I(m); VectR=R(m); Vect=[VectS; VectI; VectR]; % Ordering of all states
 Q_int_short=sparse(1,1,0,length(VectN),length(VectN)); % Transition matrix for internal epidemic
-for n=1:length(VectN)
-    R=beta*VectS(n)*VectI(n)/(VectN(n)-1) + g*VectI(n); Q_int_short(n,n)=-R;
-    R=beta*VectS(n)*VectI(n)/(VectN(n)-1); % Infection
+for LeaveStates=1:length(VectN)
+    R=beta*VectS(LeaveStates)*VectI(LeaveStates)/(VectN(LeaveStates)-1) + g*VectI(LeaveStates); Q_int_short(LeaveStates,LeaveStates)=-R;
+    R=beta*VectS(LeaveStates)*VectI(LeaveStates)/(VectN(LeaveStates)-1); % Infection
     if R>0
-        q=find(VectS==VectS(n)-1 & VectI==VectI(n)+1 & VectR==VectR(n));
-        Q_int_short(n,q)=Q_int_short(n,q)+R; % Add to transition matrix
+        q=find(VectS==VectS(LeaveStates)-1 & VectI==VectI(LeaveStates)+1 & VectR==VectR(LeaveStates));
+        Q_int_short(LeaveStates,q)=Q_int_short(LeaveStates,q)+R; % Add to transition matrix
     end
-    R=g*VectI(n); % Recovery
+    R=g*VectI(LeaveStates); % Recovery
     if R>0
-        q=find(VectS==VectS(n) & VectI==VectI(n)-1 & VectR==VectR(n)+1);
-        Q_int_short(n,q)=Q_int_short(n,q)+R;
+        q=find(VectS==VectS(LeaveStates) & VectI==VectI(LeaveStates)-1 & VectR==VectR(LeaveStates)+1);
+        Q_int_short(LeaveStates,q)=Q_int_short(LeaveStates,q)+R;
     end
 end
 
@@ -99,13 +99,13 @@ if size(Unstr_Inf)==1
 end
 
 Q_ext=sparse(1,1,0,length(nVectN),length(nVectN)); % eM is external infection
-for n=1:length(nVectN)
-    R=Unstr_Inf(nVectN(n)-1)+Struc_Inf(find(DemGrid==T(n)))/nVectN(n);
-    R=R*nVectS(n); %%% This assumes external is per person %%%
+for LeaveStates=1:length(nVectN)
+    R=Unstr_Inf(nVectN(LeaveStates)-1)+Struc_Inf(find(DemGrid==T(LeaveStates)))/nVectN(LeaveStates);
+    R=R*nVectS(LeaveStates); %%% This assumes external is per person %%%
     if R>0
-        Q_ext(n,n)=-R;
-        q=find(nVectS==nVectS(n)-1 & nVectI==nVectI(n)+1 & nVectR==nVectR(n) & nTicker==nTicker(n));
-        Q_ext(n,q)=Q_ext(n,q)+R;
+        Q_ext(LeaveStates,LeaveStates)=-R;
+        q=find(nVectS==nVectS(LeaveStates)-1 & nVectI==nVectI(LeaveStates)+1 & nVectR==nVectR(LeaveStates) & nTicker==nTicker(LeaveStates));
+        Q_ext(LeaveStates,q)=Q_ext(LeaveStates,q)+R;
     end
 end
 
@@ -239,8 +239,7 @@ for i=1:length(NGrid)
 end
 
 % Finally, calculate P_R
-n=find(nTicker==(kB+kL) | nTicker==(kB+kL+kB)); % States at leaving stage
+LeaveStates=find(nTicker==(kB+kL) | nTicker==(kB+kL+kB)); % States at leaving stage
 nER_Start=2*P_R;
 nER_Leave = nVectR; % Total exposure level at leaving
-
-P_R = sum((nER_Leave(n) - nER_Start).*H_Eq(n)')/sum((nVectN(n)-nER_Start).*H_Eq(n)');
+P_R = sum( ((nER_Leave(LeaveStates) - nER_Start)./(nVectN(LeaveStates)-nER_Start)).*H_Eq(LeaveStates)')/sum(H_Eq(LeaveStates));

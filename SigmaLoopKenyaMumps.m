@@ -1,19 +1,18 @@
-% Does the following calculations for mumps in the UK:
+% Does the following calculations for mumps in Kenya:
 %   1: r as a function of sigma
 %   2: R_* as a function of sigma
 %   3: Endemic prevalence as a function of sigma
 %   4: PR as a function of sigma
 
-load('Parameters/UK_MixingData.mat'); % Contains d_ext, d_int, ClassProb, D_All, D_Ext, E, NGrid, tickGrid, DemGrid
+load('Parameters/Kenya_MixingData.mat'); % Contains d_ext, d_int, ClassProb, D_All, D_Ext, E, NGrid, tickGrid, DemGrid
 
-load('Parameters/UKDemography.mat')
+load('Parameters/KenyaDemography.mat')
 
 % Define infectious parameters
 g=1/8;
 d_int=sum(ClassProb*(D_All-D_Ext));
 d_ext=sum(ClassProb*D_Ext);
-tau=-log(0.689)*g/d_int_kids; % Unit time transmission rate based on Hope-Simpson
-save(['Parameters/MumpsTransRate' datestr(now,'ddmmyy_HHMMSS')],'tau'); % Save this to use in Kenya calculations
+load('Parameters/MumpsTransRate.mat');
 beta_int=tau*d_int; % Internal contact rate
 beta_ext=tau*d_ext; % Unstructured external contact rate
 beta_all=tau*(d_int+d_ext); % Non-age-structured contact rate
@@ -95,9 +94,9 @@ for i=1:length(sigma)
         Prev_Full(i)=0; PR_Full(i)=0;
     end
     if abs(sigma(i)-1)<0.01
-        Equil_MumpsUK=H_Eq;
-        filename=['ModelOutput/UKMumpsEqDist_' datestr(now,'ddmmyy_HHMMSS')]; % This is the full model distribution plotted in Figure 4 of the paper
-        save(filename,'Equil_MumpsUK');
+        Equil_MumpsKenya=H_Eq;
+        filename=['ModelOutput/KenyaMumpsEqDist_' datestr(now,'ddmmyy_HHMMSS')]; % This is the full model distribution plotted in Figure 4 of the paper
+        save(filename,'Equil_MumpsKenya');
     end
     
     % Age only
@@ -141,5 +140,5 @@ for i=1:length(sigma)
     fintime=cputime-starttime;
     disp(['Completed calculation ' num2str(i) ' of ' num2str(length(sigma)) ' in ' num2str(fintime) ' seconds.']);
 end
-filename=['ModelOutput/UKMumpsSigmaLoop_' datestr(now,'ddmmyy_HHMMSS')];
+filename=['ModelOutput/KenyaMumpsSigmaLoop_' datestr(now,'ddmmyy_HHMMSS')];
 save(filename, 'sigma', 'PR_AgeOnly', 'PR_Full', 'Prev_AgeOnly', 'Prev_Full', 'r_AgeOnly', 'r_Full', 'Rs_AgeOnly', 'Rs_Full');
